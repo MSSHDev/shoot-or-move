@@ -2,7 +2,7 @@
 
 section .text
 	global _main
-	extern _printf, _strcmp, _strcpy, _getch, _exit
+	extern _printf, _strcmp, _getch, _exit
 	
 	; Import other stuff
 	extern clear
