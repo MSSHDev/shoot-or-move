@@ -2,7 +2,7 @@
 
 section .text
 	global _main
-	extern _printf, _strcmp, _getch, _exit
+	extern _printf, _strcmp, _getch, _exit, _Sleep@4
 	
 	; Import other stuff
 	extern clear
@@ -13,9 +13,11 @@ section .text
 	extern board2_min_w, board2_max_w
 	
 	; Import player stuff
-	extern player1_sprite, player1_x, player1_y
-	extern player2_sprite, player2_x, player2_y
-	extern turn, turn_counter, turn_s, draw_s
+	extern player1_sprite, player1_x, player1_y, player1_atk_x, player1_atk_y, p1atk_s
+	extern player2_sprite, player2_x, player2_y, player2_atk_x, player2_atk_y, p2atk_s
+	extern turn, turn_counter, turns_s, draw_s
+	
+	extern win1, win2
 	
 
 ; Main
@@ -29,6 +31,11 @@ _main:
 	call _printf
 	add esp, 4
 	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
 	push [player1_x]
 	push [player1_y]
 	push player1_sprite
@@ -41,10 +48,18 @@ _main:
 	call _printf
 	add esp, 12
 	
+	jmp .main_no_update
+
+.main_no_update:
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+
 	mov eax, [turn_counter]
 	
 	cmp eax, 16
-	jg .exit
+	jge .exit
 	
 	; Get player 1's and 2's input
 	mov eax, [turn]
@@ -53,8 +68,6 @@ _main:
 	je .p1in
 	
 	jg .p2in
-
-	jmp _main
 
 ; Exit
 .exit:
@@ -77,10 +90,13 @@ _main:
 	cmp eax, 77 ; Check right arrow
 	je .p1right
 	
+	cmp eax, 97 ; Check A button
+	je .p1atk
+	
 	cmp eax, 27 ; Check ESC button
 	je .exit
 	
-	jmp _main
+	jmp .main_no_update
 
 .p2in:
 	call _getch
@@ -96,6 +112,9 @@ _main:
 	
 	cmp eax, 100 ; Check D key
 	je .p2right
+	
+	cmp eax, 13 ; Check Enter button
+	je .p2atk
 	
 	cmp eax, 27 ; Check ESC button
 	je .exit
@@ -132,23 +151,187 @@ _main:
 	inc [turn_counter]
 	dec [player1_y]
 	mov [turn], 1
-	jmp _main
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
+	jmp .p2in
 .p1downdo:
 	inc [turn_counter]
 	inc [player1_y]
 	mov [turn], 1
-	jmp _main
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
+	jmp .p2in
 .p1leftdo:
 	inc [turn_counter]
 	dec [player1_x]
 	mov [turn], 1
-	jmp _main
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
+	jmp .p2in
 .p1rightdo:
 	inc [turn_counter]
 	inc [player1_x]
 	mov [turn], 1
-	jmp _main
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
+	jmp .p2in
 
+
+.p1atk:
+	push [player1_atk_x]
+	push [player1_atk_y]
+	push p1atk_s
+	call _printf
+	add esp, 12
+	
+	call _getch
+	
+	cmp eax, 72 ; Check up arrow
+	je .p1atkup
+	
+	cmp eax, 80 ; Check down arrow
+	je .p1atkdown
+	
+	cmp eax, 75 ; Check left arrow
+	je .p1atkleft
+	
+	cmp eax, 77 ; Check right arrow
+	je .p1atkright
+	
+	cmp eax, 13
+	je .chkp1atk
+	
+	jmp .p1atk
+
+.p1atkup:
+	dec [player1_atk_y]
+	
+	push clear
+	call _printf
+	add esp, 4
+
+	push boards
+	call _printf
+	add esp, 4
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
+	push [player1_atk_x]
+	push [player1_atk_y]
+	push p1atk_s
+	call _printf
+	add esp, 12
+	
+	jmp .p1atk
+
+.p1atkdown:
+	inc [player1_atk_y]
+	
+	push clear
+	call _printf
+	add esp, 4
+
+	push boards
+	call _printf
+	add esp, 4
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
+	push [player1_atk_x]
+	push [player1_atk_y]
+	push p1atk_s
+	call _printf
+	add esp, 12
+	
+	jmp .p1atk
+
+.p1atkleft:
+	dec [player1_atk_x]
+	
+	push clear
+	call _printf
+	add esp, 4
+
+	push boards
+	call _printf
+	add esp, 4
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
+	push [player1_atk_x]
+	push [player1_atk_y]
+	push p1atk_s
+	call _printf
+	add esp, 12
+	
+	jmp .p1atk
+
+.p1atkright:
+	inc [player1_atk_x]
+	
+	push clear
+	call _printf
+	add esp, 4
+
+	push boards
+	call _printf
+	add esp, 4
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
+	push [player1_atk_x]
+	push [player1_atk_y]
+	push p1atk_s
+	call _printf
+	add esp, 12
+	
+	jmp .p1atk
+
+.chkp1atk:
+	mov [turn], 1
+
+	mov eax, [player2_x]
+	mov ebx, [player2_y]
+	
+	mov ecx, [player1_atk_x]
+	mov edx, [player1_atk_y]
+	
+	cmp eax, ecx
+	jne .main_no_update
+	
+	cmp ebx, edx
+	jne .main_no_update
+	
+	je .win2
+	
 
 ; Player 2 support movement
 .p2up:
@@ -179,26 +362,76 @@ _main:
 	inc [turn_counter]
 	dec [player2_y]
 	mov [turn], 0
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
 	jmp _main
 .p2downdo:
 	inc [turn_counter]
 	inc [player2_y]
 	mov [turn], 0
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
 	jmp _main
 .p2leftdo:
 	inc [turn_counter]
 	dec [player2_x]
 	mov [turn], 0
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
 	jmp _main
 .p2rightdo:
 	inc [turn_counter]
 	inc [player2_x]
 	mov [turn], 0
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
 	jmp _main
 
+.p2atk:
+	push [player2_atk_x]
+	push [player2_atk_y]
+	push p2atk_s
+	call _printf
+	add esp, 12
+	
+	call _getch
+	
+	cmp eax, 72 ; Check up arrow
+	je .p2atkup
+	
+	cmp eax, 80 ; Check down arrow
+	je .p2atkdown
+	
+	cmp eax, 75 ; Check left arrow
+	je .p2atkleft
+	
+	cmp eax, 77 ; Check right arrow
+	je .p2atkright
+	
+	cmp eax, 13
+	je .chkp2atk
+	
+	jmp .p2atk
 
-; Update
-.update:
+.p2atkup:
+	dec [player2_atk_y]
+	
 	push clear
 	call _printf
 	add esp, 4
@@ -207,16 +440,129 @@ _main:
 	call _printf
 	add esp, 4
 	
-	push [player1_x]
-	push [player1_y]
-	push player1_sprite
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
+	push [player2_atk_x]
+	push [player2_atk_y]
+	push p2atk_s
 	call _printf
 	add esp, 12
 	
-	push [player2_x]
-	push [player2_y]
-	push player2_sprite
+	jmp .p2atk
+
+.p2atkdown:
+	inc [player2_atk_y]
+	
+	push clear
+	call _printf
+	add esp, 4
+
+	push boards
+	call _printf
+	add esp, 4
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
+	push [player2_atk_x]
+	push [player2_atk_y]
+	push p2atk_s
 	call _printf
 	add esp, 12
 	
-	jmp _main
+	jmp .p2atk
+
+.p2atkleft:
+	dec [player2_atk_x]
+	
+	push clear
+	call _printf
+	add esp, 4
+
+	push boards
+	call _printf
+	add esp, 4
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
+	push [player2_atk_x]
+	push [player2_atk_y]
+	push p2atk_s
+	call _printf
+	add esp, 12
+	
+	jmp .p2atk
+
+.p2atkright:
+	inc [player2_atk_x]
+	
+	push clear
+	call _printf
+	add esp, 4
+
+	push boards
+	call _printf
+	add esp, 4
+	
+	push [turn]
+	push turns_s
+	call _printf
+	add esp, 8
+	
+	push [player2_atk_x]
+	push [player2_atk_y]
+	push p2atk_s
+	call _printf
+	add esp, 12
+	
+	jmp .p2atk
+
+.chkp2atk:
+	mov [turn], 0
+
+	mov eax, [player1_x]
+	mov ebx, [player1_y]
+	
+	mov ecx, [player2_atk_x]
+	mov edx, [player2_atk_y]
+	
+	cmp eax, ecx
+	jne _main
+	
+	cmp ebx, edx
+	jne _main
+	
+	je .win2
+
+
+; Win conditions
+.win1:
+	push win1
+	call _printf
+	add esp, 4
+	
+	push 2000
+	call _Sleep@4
+	
+	push 0
+	call _exit
+
+
+.win2:
+	push win2
+	call _printf
+	add esp, 4
+	
+	push 2000
+	call _Sleep@4
+	
+	push 0
+	call _exit
