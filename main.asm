@@ -2,7 +2,7 @@
 
 section .text
 	global _main
-	extern _printf, _strcmp, _getch, _exit, _Sleep@4
+	extern _printf, _getch, _exit, _Sleep@4
 	
 	; Import other stuff
 	extern clear
@@ -18,6 +18,7 @@ section .text
 	extern turn, turn_counter, turns_s, draw_s
 	
 	extern win1, win2
+	extern p1_dead, p2_dead
 	
 
 ; Main
@@ -59,7 +60,7 @@ _main:
 	mov eax, [turn_counter]
 	
 	cmp eax, 16
-	jge .exit
+	jge .draw
 	
 	; Get player 1's and 2's input
 	mov eax, [turn]
@@ -330,7 +331,7 @@ _main:
 	cmp ebx, edx
 	jne .main_no_update
 	
-	je .win2
+	je .win1
 	
 
 ; Player 2 support movement
@@ -545,6 +546,9 @@ _main:
 
 ; Win conditions
 .win1:
+	mov dword [p1_dead], 0
+	mov dword [p2_dead], 1
+
 	push win1
 	call _printf
 	add esp, 4
@@ -557,7 +561,21 @@ _main:
 
 
 .win2:
+	mov dword [p1_dead], 1
+	mov dword [p2_dead], 0
+
 	push win2
+	call _printf
+	add esp, 4
+	
+	push 2000
+	call _Sleep@4
+	
+	push 0
+	call _exit
+
+.draw:
+	push draw_s
 	call _printf
 	add esp, 4
 	

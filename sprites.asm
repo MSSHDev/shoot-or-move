@@ -34,6 +34,8 @@ section .data
 	global win1, win2
 	global draw_s
 	
+	global p1_dead
+	global p2_dead
 	
 	; Clear
 	clear db 0x1B, "[2J", 0x1B, "[H", 0
@@ -76,3 +78,6 @@ section .data
 	turn dd 0
 	turn_counter dd 0
 	turns_s db 0x1B, "[6;1H%d's turn", 0
+	
+	p1_dead dd 0
+	p2_dead dd 0
