@@ -1,4 +1,4 @@
-:: makefile
+:: makefile complete
 @echo off
 cls
 nasm -f win32 main.asm -o main.obj
